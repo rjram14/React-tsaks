@@ -1,23 +1,29 @@
 import React, { useState, useEffect } from "react";
 import "../component/main.css";
-import { useHistory } from "react-router-dom";
-import Route from "./Route";
-
-const Main = () => {
+import { BrowserRouter as Router, useHistory } from "react-router-dom";
+import { connect } from "react-redux";
+import { loadProducts, addCartItem } from "../Action/actions";
+const Main = ({ products, itemsInCart, addCartItem, loadProducts }) => {
   let history = useHistory();
-  const [productArr, setProductArr] = useState([
-    { id: 1, val: "simple product1 - 100" },
-    { id: 2, val: "simple product2 - 101" },
-    { id: 3, val: "simple product3 - 102" },
-    { id: 4, val: "simple product4 - 103" },
-    { id: 5, val: "simple product5 - 104" },
-    { id: 6, val: "simple product6 - 105" },
-    { id: 7, val: "simple product7 - 105" },
-  ]);
+  const [productArr, setProductArr] = useState(products);
   const [show, setShow] = useState([...productArr]);
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(itemsInCart);
   const [searchQuery, setSearchQuery] = useState([]);
   const [checkedProduct, setCheckedProduct] = useState([]);
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  useEffect(() => {
+    setProductArr(() => products);
+    setShow(() => products);
+  }, [products]);
+
+  useEffect(() => {
+    setCart(() => itemsInCart);
+  }, [itemsInCart]);
+
   const updateCart = (event) => {
     const isChecked = event.target.checked;
     const prodId = event.target.value;
@@ -29,10 +35,10 @@ const Main = () => {
       setCheckedProduct(() => prod);
     }
   };
+
   const addToCart = () => {
     if (checkedProduct.length !== 0) {
-      setCart((cart) => [...cart, ...checkedProduct]);
-      //   setCheckedProduct(() => []);
+      addCartItem(checkedProduct);
     }
   };
   const getProductById = (id) => {
@@ -52,21 +58,25 @@ const Main = () => {
     const filtered = productArr.filter((item) => item.val.indexOf(query) != -1);
     setShow(() => filtered);
   };
+
+  const handleClick = () => {
+    history.push("/newScreen");
+  };
   return (
     <div className="main-div">
       <header>
         <ul className="topnav " id="myTopnav">
           <a>
             {" "}
-            <i class="fas fa-circle"></i> Blue
+            <i className="fas fa-circle"></i> Blue
           </a>
           <a>
             {" "}
-            <i class="fas fa-circle"></i> Red
+            <i className="fas fa-circle"></i> Red
           </a>
 
-          <a className="icon" onclick="myFunction()"></a>
-          <i class="fa fa-bars"></i>
+          <a className="icon"></a>
+          <i className="fa fa-bars"></i>
         </ul>
       </header>
 
@@ -84,10 +94,10 @@ const Main = () => {
             Search
           </button>
 
-          {show.map((value) => {
+          {show.map((value, idx) => {
             // console.log(show);
             return (
-              <ul id="myUL">
+              <ul id="myUL" key={idx}>
                 <input
                   style={{ marginTop: "18px" }}
                   type="checkbox"
@@ -111,10 +121,10 @@ const Main = () => {
             <div>Car</div>
             <div>{cart.length} items</div>
           </div>
-          {cart.map((value) => {
+          {cart.map((value, idx) => {
             // console.log(show);
             return (
-              <ul id="myUL">
+              <ul id="myUL" key={idx}>
                 <li>
                   <a href="#">{value.val}</a>
                 </li>
@@ -124,7 +134,7 @@ const Main = () => {
           <button
             style={{ marginTop: "200px" }}
             className="addcart"
-            onClick={history.push("/")}
+            onClick={handleClick}
           >
             Checkout -{" "}
           </button>
@@ -134,8 +144,11 @@ const Main = () => {
   );
 };
 
-export default Main;
-
-// sidemenu.pho - in view folder
-// controller - web.php — copy one function and make stack
-// meta-data - go to web folder —> meta - create same file as file name and put all configuration
+const mapStateToProps = (state) => {
+  // console.log(state);
+  return {
+    products: state.prods.products,
+    itemsInCart: state.prods.itemsInCart,
+  };
+};
+export default connect(mapStateToProps, { loadProducts, addCartItem })(Main);

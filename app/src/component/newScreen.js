@@ -6,9 +6,12 @@ const NewScreen = () => {
       style={{
         border: "1px solid ",
         color: "red",
+        height: "200px",
+        justifyContent: "center",
+        padding: "100px",
       }}
     >
-      hello i have Done .
+      Hello It is implemented by redux as well.
     </div>
   );
 };
